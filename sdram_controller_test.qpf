@@ -1,0 +1,6 @@
+DATE = "17:20:48 December 30, 2018"
+QUARTUS_VERSION = "16.0.0"
+
+# Revisions
+
+PROJECT_REVISION = "sdram_controller_test"
