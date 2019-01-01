@@ -40,6 +40,8 @@ module sdram_controller_test(
 //=======================================================
 reg     [9:0]   data            = 10'b0001000100;
 reg     [4:0]   state           = 5'b00001;
+reg     [4:0]   next_state      = 5'b00010;
+
 wire   [24:0]   address         = 25'h001;
 wire            reset           = 1'b0;
 
@@ -64,22 +66,30 @@ assign  read_command    = KEY[1];
 
 always @(posedge MAX10_CLK1_50)
 begin
+    state <= #1 next_state;
+end
+
+
+always @(state or write_command or read_command)
+begin
     case(state)
         5'b00001:
             if(write_command)
-                state   <= 5'b00010;
+                next_state  <= 5'b00010;
             else if(read_command)
-                state   <= 5'b01000;
+                next_state  <= 5'b01000;
+            else
+                next_state  <= 5'b00001;
         5'b00010:
             if(write_finished)
-                state   <= 5'b00100;
+                next_state  <= 5'b00100;
         5'b00100:
-            state       <= 5'b00001;
+            next_state      <= 5'b00001;
         5'b01000:
             if(write_finished)
-                state   <= 5'b10000;
+                next_state  <= 5'b10000;
         5'b10000:
-            state       <= 5'b00001;
+            next_state      <= 5'b00001;
     endcase
 end
 
@@ -88,29 +98,29 @@ begin
     case(state)
         5'b00001:
         begin
-            write_request   <= 1'b0;
-            read_request    <= 1'b0;
+            write_request   <= #1 1'b0;
+            read_request    <= #1 1'b0;
         end
         5'b00010:
         begin
-            write_request   <= 1'b1;
-            read_request    <= 1'b0;
+            write_request   <= #1 1'b1;
+            read_request    <= #1 1'b0;
         end
         5'b00100:
         begin
-            write_request   <= 1'b0;
-            read_request    <= 1'b0;
+            write_request   <= #1 1'b0;
+            read_request    <= #1 1'b0;
         end
         5'b01000:
         begin
-            write_request   <= 1'b0;
-            read_request    <= 1'b1;
+            write_request   <= #1 1'b0;
+            read_request    <= #1 1'b1;
         end
         5'b10000:
         begin
-            write_request   <= 1'b0;
-            read_request    <= 1'b0;
-            data            <= read_data[9:0];
+            write_request   <= #1 1'b0;
+            read_request    <= #1 1'b0;
+            data            <= #1 read_data[9:0];
         end
     endcase
 end

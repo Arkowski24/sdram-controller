@@ -24,7 +24,7 @@ module sdram_read(
 );
 
 reg      [6:0]  state       = 7'b0000001;
-wire     [6:0]  next_state;
+reg      [6:0]  next_state;
 
 reg      [3:0]  command     = 4'h0;
 reg     [12:0]  address     = 13'h0;
@@ -50,14 +50,6 @@ assign {DRAM_UDQM, DRAM_LDQM}                           = ienb ? dqm        : 2'
 assign DRAM_CLK                                         = ienb ? iclk       : 1'bz;
 assign DRAM_CKE                                         = ienb ? 1'b1       : 1'bz;
 
-always @(posedge iclk)
-begin
-    if(ireset == 1'b1)
-        state <= #1 7'b0000001;
-    else
-        state <= #1 next_state;
-end
-
 always @(posedge iclk or posedge ctr_reset)
 begin
     if(ctr_reset)
@@ -66,43 +58,49 @@ begin
         counter <= #1 (counter + 1'b1);
 end
 
-assign nop_count1 = (counter == 4'b0011);
-assign nop_count2 = (counter == 4'b0011);
-assign next_state = nex_state_fun(state, ireq, nop_count1, nop_count2);
+assign nop_count1 = (counter[1:0] == 2'b11 || counter[2] == 1'b1 || counter[3] == 1'b1);
+assign nop_count2 = (counter[1:0] == 2'b11 || counter[2] == 1'b1 || counter[3] == 1'b1);
 
-function [6:0] nex_state_fun;
-    input [6:0] state;
-    input       ireq;
-    input       nop_count1;
-    input       nop_count2;    
+always @(posedge iclk)
+begin
+    if(ireset == 1'b1)
+        state <= #1 7'b0000001;
+    else
+        state <= #1 next_state;
+end
+
+always @(state or ireq or nop_count1 or nop_count2)
+begin
     case(state)
         7'b0000001:
             if(ireq)
-                nex_state_fun   = 7'b0000010;
+                next_state   <= 7'b0000010;
             else
-                nex_state_fun   = 7'b0000001;
-        7'b0000010:   
-            nex_state_fun       = 7'b0000100;              
+                next_state   <= 7'b0000001;
+        7'b0000010:
+            next_state       <= 7'b0000100;
         7'b0000100:
             if(nop_count1)
-                nex_state_fun   = 7'b0001000; 
+                next_state   <= 7'b0001000;
             else
-                nex_state_fun   = 7'b0000100; 
+                next_state   <= 7'b0000100;
         7'b0001000:
-                nex_state_fun   = 7'b0010000;
+                next_state   <= 7'b0010000;
         7'b0010000:
             if(nop_count2)
-                nex_state_fun   = 7'b0100000;
+                next_state   <= 7'b0100000;
             else
-                nex_state_fun   = 7'b0010000;     
+                next_state   <= 7'b0010000;
         7'b0100000:
-            nex_state_fun       = 7'b1000000;
+            next_state       <= 7'b1000000;
         7'b1000000:
-            nex_state_fun       = 7'b0000001;
+            next_state       <= 7'b0000001;
+        default:
+            next_state       <= 7'b0000001;
     endcase
-endfunction
+end
 
-always @(posedge iclk)
+always @(state)
 begin
     case(state)
         7'b0000001:
