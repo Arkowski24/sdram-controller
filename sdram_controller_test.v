@@ -38,26 +38,26 @@ module sdram_controller_test(
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
-reg     [9:0]   data            = 10'b0;
+reg     [9:0]   data            = 10'b0001000100;
 reg     [4:0]   state           = 5'b00001;
-wire   [24:0]   address         = 24'b0;
+wire   [24:0]   address         = 25'h001;
 wire            reset           = 1'b0;
 
-wire             write_command;
-wire             read_command;
-wire             write_finished;
-wire             read_finished;
-wire    [15:0]   write_data;
-wire    [15:0]   read_data;
+wire            write_command;
+wire            read_command;
+wire            write_finished;
+wire            read_finished;
+wire   [15:0]   write_data;
+wire   [15:0]   read_data;
 
-reg     write_request;
-reg     read_request;
+reg             write_request;
+reg             read_request;
 
 //=======================================================
 //  Structural coding
 //=======================================================
 assign  write_data      = {6'b0, SW};
-assign  LEDR            = data[9:0];
+assign  LEDR            = data;
 
 assign  write_command   = KEY[0];
 assign  read_command    = KEY[1];
@@ -70,20 +70,14 @@ begin
                 state   <= 5'b00010;
             else if(read_command)
                 state   <= 5'b01000;
-            else
-                state   <= 5'b00001;
         5'b00010:
             if(write_finished)
                 state   <= 5'b00100;
-            else
-                state   <= 5'b00010;
         5'b00100:
             state       <= 5'b00001;
         5'b01000:
             if(write_finished)
                 state   <= 5'b10000;
-            else
-                state   <= 5'b01000;
         5'b10000:
             state       <= 5'b00001;
     endcase

@@ -36,7 +36,8 @@ reg      [1:0]  mul_state   = 2'b00;
 
 reg             init_reset  = 1'b0;
 reg             write_reset = 1'b0;
-reg             read_reset  = 1'b0;
+reg             read_req    = 1'b0;
+reg             data_ok     = 1'b0;
 
 //SDRAM INITLIZE MODULE
 wire            init_iclk;
@@ -76,12 +77,13 @@ wire	        write_DRAM_WE_N;
 
 //SDRAM READ MODULE
 wire            read_iclk;
-wire            read_ireset;
+wire            read_ireq;
 wire    [12:0]  read_irow;
 wire     [9:0]  read_icolumn;
 wire     [1:0]  read_ibank;
 wire	[15:0]  read_odata;
 wire            read_fin;
+
 wire    [12:0]  read_DRAM_ADDR;
 wire	 [1:0]	read_DRAM_BA;
 wire		    read_DRAM_CAS_N;
@@ -94,16 +96,20 @@ wire		    read_DRAM_RAS_N;
 wire	        read_DRAM_UDQM;
 wire	        read_DRAM_WE_N;
 
+
+wire            read_chosen;
+wire            write_chosen;
 //=======================================================
 //  Structural coding
 //=======================================================
+//TO DO -- Usunąć to i zastąpić tristate'ami. 
 assign DRAM_ADDR        = (mul_state == 2'b10) ? read_DRAM_ADDR     : ((mul_state == 2'b01) ? write_DRAM_ADDR   : init_DRAM_ADDR);
 assign DRAM_BA          = (mul_state == 2'b10) ? read_DRAM_BA       : ((mul_state == 2'b01) ? write_DRAM_BA     : init_DRAM_BA);
 assign DRAM_CAS_N       = (mul_state == 2'b10) ? read_DRAM_CAS_N    : ((mul_state == 2'b01) ? write_DRAM_CAS_N  : init_DRAM_CAS_N);
 assign DRAM_CKE         = (mul_state == 2'b10) ? read_DRAM_CKE      : ((mul_state == 2'b01) ? write_DRAM_CKE    : init_DRAM_CKE);
 assign DRAM_CLK         = (mul_state == 2'b10) ? read_DRAM_CLK      : ((mul_state == 2'b01) ? write_DRAM_CLK    : init_DRAM_CLK);
 assign DRAM_CS_N        = (mul_state == 2'b10) ? read_DRAM_CS_N     : ((mul_state == 2'b01) ? write_DRAM_CS_N   : init_DRAM_CS_N);
-assign DRAM_DQ          = (mul_state == 2'b10) ? read_DRAM_DQ       : ((mul_state == 2'b01) ? write_DRAM_DQ     : init_DRAM_DQ);
+assign DRAM_DQ          = data_ok? ((read_chosen) ? read_DRAM_DQ : ((write_chosen) ? write_DRAM_DQ : init_DRAM_DQ)) : 16'bz;
 assign DRAM_LDQM        = (mul_state == 2'b10) ? read_DRAM_LDQM     : ((mul_state == 2'b01) ? write_DRAM_LDQM   : init_DRAM_LDQM);
 assign DRAM_RAS_N       = (mul_state == 2'b10) ? read_DRAM_RAS_N    : ((mul_state == 2'b01) ? write_DRAM_RAS_N  : init_DRAM_RAS_N);
 assign DRAM_UDQM        = (mul_state == 2'b10) ? read_DRAM_UDQM     : ((mul_state == 2'b01) ? write_DRAM_UDQM   : init_DRAM_UDQM);
@@ -115,7 +121,7 @@ assign read_iclk        = iclk;
 
 assign init_ireset  = init_reset;
 assign write_ireset = write_reset;
-assign read_ireset  = read_reset;
+assign read_ireq    = read_req;
 
 assign {write_ibank, write_irow, write_icolumn} = iwrite_address;
 assign {read_ibank, read_irow, read_icolumn}    = iread_address;
@@ -125,6 +131,9 @@ assign read_odata                               = oread_data;
 assign owrite_ack                               = write_ack;
 assign oread_ack                                = read_ack;
 assign oread_data                               = read_odata;
+
+assign write_chosen = mul_state == 2'b01;
+assign read_chosen  = mul_state == 2'b10;
 
 always @(posedge iclk or posedge ireset)
 begin
@@ -178,100 +187,109 @@ begin
         begin            
             init_reset      <= 1'b1;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b00;
+            data_ok         <= 1'b0;
         end
         9'b000000010:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b00;
+            data_ok         <= 1'b0;
         end
         9'b000000100:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b00;
+            data_ok         <= 1'b0;
         end
         9'b000001000:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b1;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b01;
+            data_ok         <= 1'b1;
         end
         9'b000010000:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b01;
+            data_ok         <= 1'b1;
         end
         9'b000100000:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b1;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b01;
+            data_ok         <= 1'b0;
         end
         9'b001000000:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b1;
+            read_req        <= 1'b1;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b10;
+            data_ok         <= 1'b1;
         end
         9'b010000000:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b0;
             
             mul_state       <= 2'b10;
+            data_ok         <= 1'b1;
         end
         9'b100000000:
         begin            
             init_reset      <= 1'b0;
             write_reset     <= 1'b0;
-            read_reset      <= 1'b0;
+            read_req        <= 1'b0;
             
             write_ack       <= 1'b0;
             read_ack        <= 1'b1;
             
             mul_state       <= 2'b10;
+            data_ok         <= 1'b0;
         end
     endcase
 end
@@ -301,6 +319,7 @@ sdram_write sdram_write (
     .icolumn(write_icolumn),
     .ibank(write_ibank),
     .owrite_fin(write_fin),
+    
     .DRAM_ADDR(write_DRAM_ADDR),
     .DRAM_BA(write_DRAM_BA),
     .DRAM_CAS_N(write_DRAM_CAS_N),
@@ -316,23 +335,26 @@ sdram_write sdram_write (
 
 sdram_read sdram_read (
     .iclk(read_iclk),
-    .ireset(read_ireset),
+    .ireq(read_ireq),
+    .ienb(read_ienb),
+    
     .irow(read_irow),
     .icolumn(read_icolumn),
     .ibank(read_ibank),
     .odata(read_odata),
-    .oread_fin(read_fin),
-    .DRAM_ADDR(read_DRAM_ADDR),
-    .DRAM_BA(read_DRAM_BA),
-    .DRAM_CAS_N(read_DRAM_CAS_N),
-    .DRAM_CKE(read_DRAM_CKE),
-    .DRAM_CLK(read_DRAM_CLK),
-    .DRAM_CS_N(read_DRAM_CS_N),
-    .DRAM_DQ(read_DRAM_DQ),
-    .DRAM_LDQM(read_DRAM_LDQM),
-    .DRAM_RAS_N(read_DRAM_RAS_N),
-    .DRAM_UDQM(read_DRAM_UDQM),
-    .DRAM_WE_N(read_DRAM_WE_N)
+    .ofin(read_fin),
+    
+    .DRAM_ADDR(DRAM_ADDR),
+    .DRAM_BA(DRAM_BA),
+    .DRAM_CAS_N(DRAM_CAS_N),
+    .DRAM_CKE(DRAM_CKE),
+    .DRAM_CLK(DRAM_CLK),
+    .DRAM_CS_N(DRAM_CS_N),
+    .DRAM_DQ(DRAM_DQ),
+    .DRAM_LDQM(DRAM_LDQM),
+    .DRAM_RAS_N(DRAM_RAS_N),
+    .DRAM_UDQM(DRAM_UDQM),
+    .DRAM_WE_N(DRAM_WE_N)
 );
 
 endmodule

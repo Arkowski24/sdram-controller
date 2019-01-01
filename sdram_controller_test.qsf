@@ -2,12 +2,12 @@
 # Build by Terasic System Builder
 #============================================================
 
-set_global_assignment -name FAMILY "MAX 10"
-set_global_assignment -name DEVICE 10M50DAF484C6GES
-set_global_assignment -name TOP_LEVEL_ENTITY sdram_controller_test
-set_global_assignment -name ORIGINAL_QUARTUS_VERSION 16.0.0
+set_global_assignment -name FAMILY "MAX 10 FPGA"
+set_global_assignment -name DEVICE 10M50DAF484C7G
+set_global_assignment -name TOP_LEVEL_ENTITY "sdram_controller_test"
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "16.0.0"
 set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Lite Edition"
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "17:20:48 DECEMBER 30,2018"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:45:59 DECEMBER 31,2018"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 484
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
@@ -107,8 +107,8 @@ set_location_assignment PIN_V20 -to DRAM_WE_N
 #============================================================
 # KEY
 #============================================================
-set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to KEY[0]
-set_instance_assignment -name IO_STANDARD "3.3 V SCHMITT TRIGGER" -to KEY[1]
+set_instance_assignment -name IO_STANDARD "3.3 V Schmitt Trigger" -to KEY[0]
+set_instance_assignment -name IO_STANDARD "3.3 V Schmitt Trigger" -to KEY[1]
 set_location_assignment PIN_B8 -to KEY[0]
 set_location_assignment PIN_A7 -to KEY[1]
 
@@ -165,17 +165,16 @@ set_location_assignment PIN_F15 -to SW[9]
 #============================================================
 
 
-set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
-set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name VERILOG_FILE sdram_controller_test.v
 set_global_assignment -name VERILOG_FILE sdram/sdram_write.v
 set_global_assignment -name VERILOG_FILE sdram/sdram_read.v
 set_global_assignment -name VERILOG_FILE sdram/sdram_intialize.v
 set_global_assignment -name VERILOG_FILE sdram/sdram_controller.v
+set_global_assignment -name VERILOG_FILE sdram_controller_test.v
 set_global_assignment -name SDC_FILE sdram_controller_test.SDC
-set_global_assignment -name BOARD "MAX 10 DE10 - Lite"
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
