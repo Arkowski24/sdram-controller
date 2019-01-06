@@ -45,7 +45,7 @@ assign DRAM_ADDR                                        = ienb ? address    : 13
 assign DRAM_BA                                          = ienb ? bank       : 2'bz;
 assign {DRAM_CS_N, DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N}   = ienb ? command    : 4'bz;
 assign {DRAM_UDQM, DRAM_LDQM}                           = ienb ? dqm        : 2'bz;
-assign DRAM_CLK                                         = ienb ? iclk       : 1'bz;
+assign DRAM_CLK                                         = ienb ? ~iclk      : 1'bz;
 assign DRAM_CKE                                         = ienb ? 1'b1       : 1'bz;
 assign DRAM_DQ                                          = ienb ? idata      : 16'bz;
 
