@@ -38,7 +38,7 @@ module sdram_controller_test(
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
-reg     [9:0]   data            = 10'b0001000100;
+reg    [15:0]   data;
 reg     [4:0]   state           = 5'b00001;
 reg     [4:0]   next_state      = 5'b00010;
 
@@ -58,8 +58,8 @@ reg             read_request;
 //=======================================================
 //  Structural coding
 //=======================================================
-assign  write_data      = {6'b0, SW};
-assign  LEDR            = data;
+assign  write_data      = {6'b111111, SW};
+assign  LEDR            = data[9:0];
 
 assign  write_command   = KEY[0];
 assign  read_command    = KEY[1];
@@ -120,7 +120,7 @@ begin
         begin
             write_request   <= #1 1'b0;
             read_request    <= #1 1'b0;
-            data            <= #1 read_data[9:0];
+            data            <= #1 read_data;
         end
     endcase
 end

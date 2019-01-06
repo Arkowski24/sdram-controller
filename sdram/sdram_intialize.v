@@ -33,7 +33,7 @@ reg      [1:0]  dqm         = 2'b11;
 
 reg             ready       = 1'b0;
 
-reg      [3:0]  counter     = 4'h0;
+reg      [5:0]  counter     = 4'h0;
 reg             ctr_reset   = 0;
 
 wire            ref_cycles;
@@ -56,8 +56,8 @@ begin
         counter <= #1 (counter + 1'b1);
 end
 
-//ref_cycles > 7
-assign ref_cycles = (counter[3] == 1'b1);
+//ref_cycles > 16 - refresh, nop - 8 times
+assign ref_cycles = (counter >= 16);
 
 always @(posedge iclk)
 begin
@@ -83,7 +83,7 @@ begin
             if(ref_cycles)
                 next_state  <= 7'b0010000;
             else
-                next_state  <= 7'b0001000;
+                next_state  <= 7'b0000100;
         7'b0010000:
             next_state      <= 7'b0100000;
         7'b0100000:
@@ -114,7 +114,7 @@ begin
             bank                <= #1 2'b11;
             ready               <= #1 1'b0;
             
-            ctr_reset           <= #1 1'b0;
+            ctr_reset           <= #1 1'b1;
         end
         7'b0000100:
         begin
@@ -123,7 +123,7 @@ begin
             bank                <= #1 2'b00;
             ready               <= #1 1'b0;
             
-            ctr_reset           <= #1 1'b1;
+            ctr_reset           <= #1 1'b0;
         end
         7'b0001000:
         begin
@@ -138,7 +138,7 @@ begin
         begin
             command             <= #1 4'b0000;
             bank                <= #1 2'b00;    
-            address             <= #1 13'b0001001000000;
+            address             <= #1 13'b0001000100000;
             ready               <= #1 1'b0;
             
             ctr_reset           <= #1 1'b0;
