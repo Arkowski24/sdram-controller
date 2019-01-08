@@ -42,7 +42,7 @@ reg    [15:0]   data;
 reg     [4:0]   state           = 5'b00001;
 reg     [4:0]   next_state      = 5'b00010;
 
-wire   [24:0]   address         = 25'h001;
+wire   [24:0]   address         = 25'h011;
 wire            reset           = 1'b0;
 
 wire            write_command;
@@ -61,8 +61,8 @@ reg             read_request;
 assign  write_data      = {6'b111111, SW};
 assign  LEDR            = data[9:0];
 
-assign  write_command   = KEY[0];
-assign  read_command    = KEY[1];
+assign  write_command   = ~KEY[0];
+assign  read_command    = ~KEY[1];
 
 always @(posedge MAX10_CLK1_50)
 begin
@@ -70,7 +70,7 @@ begin
 end
 
 
-always @(state or write_command or read_command)
+always @(state or write_command or read_command or write_finished or read_finished)
 begin
     case(state)
         5'b00001:
@@ -80,14 +80,20 @@ begin
                 next_state  <= 5'b01000;
             else
                 next_state  <= 5'b00001;
+                
         5'b00010:
             if(write_finished)
                 next_state  <= 5'b00100;
+            else
+                next_state  <= 5'b00010;
         5'b00100:
             next_state      <= 5'b00001;
+            
         5'b01000:
-            if(write_finished)
+            if(read_finished)
                 next_state  <= 5'b10000;
+            else
+                next_state  <= 5'b01000;
         5'b10000:
             next_state      <= 5'b00001;
     endcase
@@ -101,6 +107,7 @@ begin
             write_request   <= #1 1'b0;
             read_request    <= #1 1'b0;
         end
+        
         5'b00010:
         begin
             write_request   <= #1 1'b1;
@@ -111,6 +118,7 @@ begin
             write_request   <= #1 1'b0;
             read_request    <= #1 1'b0;
         end
+        
         5'b01000:
         begin
             write_request   <= #1 1'b0;

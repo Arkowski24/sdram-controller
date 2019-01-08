@@ -89,6 +89,7 @@ begin
                 next_state  <= 9'b000000100;
             else
                 next_state  <= 9'b000000010;
+                
         //Idle State
         9'b000000100:
             if(iwrite_req)
@@ -97,6 +98,7 @@ begin
                 next_state  <= 9'b001000000;
             else
                 next_state  <= 9'b000000100;
+                
         //Write States
         9'b000001000:
             next_state      <= 9'b000010000;    
@@ -107,6 +109,7 @@ begin
                 next_state  <= 9'b000010000;
         9'b000100000:
             next_state      <= 9'b000000100;
+            
         //Read States        `
         9'b001000000:
             next_state      <= 9'b010000000;
@@ -123,6 +126,7 @@ end
 always @(state)
 begin
     case(state)
+        //Init States
         9'b000000001:
         begin            
             init_ireq       <= 1'b1;
@@ -145,6 +149,8 @@ begin
             
             mul_state       <= 3'b001;
         end
+        
+        //Idle State
         9'b000000100:
         begin            
             init_ireq       <= 1'b0;
@@ -156,6 +162,8 @@ begin
             
             mul_state       <= 3'b001;
         end
+        
+        //Write States
         9'b000001000:
         begin            
             init_ireq       <= 1'b0;
@@ -167,6 +175,7 @@ begin
             
             mul_state       <= 3'b010;
         end
+        
         9'b000010000:
         begin            
             init_ireq       <= 1'b0;
@@ -189,6 +198,8 @@ begin
             
             mul_state       <= 3'b010;
         end
+        
+        //Read States
         9'b001000000:
         begin            
             init_ireq       <= 1'b0;

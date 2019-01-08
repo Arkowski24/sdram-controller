@@ -58,8 +58,8 @@ begin
         counter <= #1 (counter + 1'b1);
 end
 
-assign nop_count1 = (counter[1:0] == 2'b11 || counter[2] == 1'b1 || counter[3] == 1'b1);
-assign nop_count2 = (counter[1:0] == 2'b11 || counter[2] == 1'b1 || counter[3] == 1'b1);
+assign nop_count1 = (counter == 15);
+assign nop_count2 = (counter == 15);
 
 always @(posedge iclk)
 begin
