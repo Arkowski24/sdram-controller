@@ -42,7 +42,7 @@ reg   [127:0]   data;
 reg     [4:0]   state           = 5'b00001;
 reg     [4:0]   next_state      = 5'b00010;
 
-wire   [24:0]   address         = 25'd016;
+wire   [21:0]   address         = 22'b1;
 wire            reset           = 1'b0;
 
 wire            write_command;

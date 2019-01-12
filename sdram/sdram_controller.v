@@ -3,12 +3,12 @@ module sdram_controller(
     input 		          		ireset,
     
     input                       iwrite_req,
-    input           [24:0]      iwrite_address,
+    input           [21:0]      iwrite_address,
     input          [127:0]      iwrite_data,
     output                      owrite_ack,
     
     input                       iread_req,
-    input           [24:0]      iread_address,
+    input           [21:0]      iread_address,
     output         [127:0]      oread_data,
     output                      oread_ack,
     
@@ -36,6 +36,9 @@ reg      [2:0]  mul_state   = 3'b001;
 reg             read_ack    = 1'b0;
 reg             write_ack   = 1'b0;
 
+//Next opperation priority - 0 = Write, 1 = Read
+reg             next_prior  = 1'b0;
+
 //SDRAM INITLIZE MODULE
 reg             init_ireq   = 1'b0;
 wire            init_ienb;
@@ -61,8 +64,8 @@ wire            read_fin;
 //=======================================================
 //  Structural coding
 //=======================================================
-assign {write_ibank, write_irow, write_icolumn} = iwrite_address;
-assign {read_ibank, read_irow, read_icolumn}    = iread_address;
+assign {write_ibank, write_irow, write_icolumn} = {iwrite_address, 3'b0};
+assign {read_ibank, read_irow, read_icolumn}    = {iread_address, 3'b0};
 
 assign owrite_ack                               = write_ack;
 assign oread_ack                                = read_ack;
@@ -77,7 +80,7 @@ begin
         state <= #1 next_state;
 end
 
-always @(state or init_fin or iwrite_req or iread_req or write_fin or read_fin)
+always @(state or init_fin or iwrite_req or iread_req or write_fin or read_fin or next_prior)
 begin
     case(state)
         //Init States
@@ -91,13 +94,24 @@ begin
                 
         //Idle State
         9'b000000100:
-            if(iwrite_req)
-                next_state  <= 9'b000001000;
-            else if(iread_req)
-                next_state  <= 9'b001000000;
+            if(next_prior)
+            begin
+                if(iread_req)
+                    next_state  <= 9'b001000000;
+                else if(iwrite_req)
+                    next_state  <= 9'b000001000;
+                else
+                    next_state  <= 9'b000000100;
+            end
             else
-                next_state  <= 9'b000000100;
-                
+            begin
+                if(iwrite_req)
+                    next_state  <= 9'b000001000;
+                else if(iread_req)
+                    next_state  <= 9'b001000000;
+                else
+                    next_state  <= 9'b000000100;
+            end
         //Write States
         9'b000001000:
             next_state      <= 9'b000010000;    
@@ -196,6 +210,7 @@ begin
             read_ack        <= 1'b0;
             
             mul_state       <= 3'b010;
+            next_prior      <= 1'b1;
         end
         
         //Read States
@@ -231,6 +246,7 @@ begin
             read_ack        <= 1'b1;
             
             mul_state       <= 3'b100;
+            next_prior      <= 1'b0;
         end
     endcase
 end
