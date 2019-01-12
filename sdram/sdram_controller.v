@@ -4,12 +4,12 @@ module sdram_controller(
     
     input                       iwrite_req,
     input           [24:0]      iwrite_address,
-    input           [15:0]      iwrite_data,
+    input          [127:0]      iwrite_data,
     output                      owrite_ack,
     
     input                       iread_req,
     input           [24:0]      iread_address,
-    output          [15:0]      oread_data,
+    output         [127:0]      oread_data,
     output                      oread_ack,
     
 	//////////// SDRAM //////////
@@ -55,7 +55,6 @@ wire            read_ienb;
 wire    [12:0]  read_irow;
 wire     [9:0]  read_icolumn;
 wire     [1:0]  read_ibank;
-wire	[15:0]  read_odata;
 wire            read_fin;
 
 
