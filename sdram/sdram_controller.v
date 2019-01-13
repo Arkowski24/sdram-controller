@@ -133,6 +133,8 @@ begin
                 next_state  <= 9'b010000000;
         9'b100000000:
             next_state      <= 9'b000000100;
+        default:
+            next_state      <= 9'b000000001;
     endcase
 end
 
