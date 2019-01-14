@@ -30,31 +30,31 @@ module sdram_vga_test(
 );   
 
 wire iclk_50;
-reg  iclk_25 = 0;
+reg  iclk_25 = 1'b1;
 
-wire read_request;
-wire read_address;
-wire read_data;
-wire read_ack;
+wire            read_request;
+wire  [21:0]    read_address;
+wire [127:0]    read_data;
+wire            read_ack;
 
-wire write_request;
-wire write_address;
-wire write_data;
-wire write_ack;
+wire            write_request;
+wire  [21:0]    write_address;
+wire [127:0]    write_data;
+wire            write_ack;
 
-wire vga_current_x;
-wire vga_current_y;
-wire vga_active_d;
-wire vga_red;
-wire vga_green;
-wire vga_blue;
+wire [9:0]      vga_current_x;
+wire [9:0]      vga_current_y;
+wire            vga_active_d;
+wire [3:0]      vga_red;
+wire [3:0]      vga_green;
+wire [3:0]      vga_blue;
 
-wire gen_current_x;
-wire gen_current_y;
-wire gen_active_d;
-wire gen_red;
-wire gen_green;
-wire gen_blue;
+wire [9:0]      gen_current_x;
+wire [9:0]      gen_current_y;
+wire            gen_active_d;
+wire [3:0]      gen_red;
+wire [3:0]      gen_green;
+wire [3:0]      gen_blue;
 
 assign iclk_50 = MAX10_CLK1_50;
 

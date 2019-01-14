@@ -20,34 +20,32 @@ module gen_sdram_adapter(
     input    [3:0]  i_blue
 );
 
+reg     [7:0]   state           = 8'b00000001;
+reg     [7:0]   next_state      = 8'b00000001;
+reg             write_request;
+
 reg   [127:0]   cache1          = 128'b1;
 reg   [127:0]   cache2          = 128'b1;
-wire            fetch_next;
 
 wire   [24:0]   current_pixel;
 wire   [63:0]   pixel_offset;
 wire   [63:0]   current_bank;
 wire   [63:0]   future_bank;
 wire  [127:0]   offset_mask;
-
-reg     [7:0]   state           = 8'b00000001;
-reg     [7:0]   next_state      = 8'b00000001;
-reg             write_request;
+wire            fetch_next;
 
 assign current_pixel    = 640 * i_current_y + i_current_x;
-
-assign pixel_offset     = current_pixel - current_bank * 10;
+assign pixel_offset     = current_pixel % 10;
 //Fast division by 10
 assign current_bank     = (64'h1999999A * current_pixel) >> 32;
-
-assign future_bank      = current_bank < 480 * 64 ? current_bank + 1 : 0;
+assign future_bank      = (current_bank < 30720) ? current_bank + 1 : 0;
 assign fetch_next       = (pixel_offset == 0) && i_active_d;
 
 assign oreq             = write_request;
 assign oaddress         = future_bank;
 assign odata            = (state < 6'b001000) ? cache2 : cache1;
 
-always @(posedge iclk_50)
+always @(negedge iclk_50)
 begin
     if(ireset)
         state <= #1 8'b00000001;

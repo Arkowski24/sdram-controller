@@ -36,9 +36,8 @@ reg             read_request;
 
 
 assign current_pixel    = 640 * i_current_y + i_current_x;
-assign pixel_offset     = current_pixel - current_bank * 10;
-
-assign current_bank     = current_pixel / 10;
+assign pixel_offset     = current_pixel % 10;
+assign current_bank     = (64'h1999999A * current_pixel) >> 32;
 assign future_bank      = (current_bank < 30720) ? (current_bank + 1) : 0;
 
 assign fetch_next       = (pixel_offset == 0) && i_active_d;
@@ -50,7 +49,7 @@ assign o_red            = cache_swt ? cache1[11:8]  : cache2[11:8];
 assign o_green          = cache_swt ? cache1[7:4]   : cache2[7:4];
 assign o_blue           = cache_swt ? cache1[3:0]   : cache2[3:0];
 
-always @(posedge iclk_50)
+always @(negedge iclk_50)
 begin
     if(ireset == 1'b1)
         state <= #1 8'b00000001;

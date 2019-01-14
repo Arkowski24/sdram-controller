@@ -60,9 +60,9 @@ reg [10:0] h_count;
 reg [10:0] v_count;
 
 // VGA Color Data
-assign oVGA_R       = i_red;
-assign oVGA_G       = i_green;
-assign oVGA_B       = i_blue;
+assign oVGA_R       = o_active_d ? i_red    : 4'b0;
+assign oVGA_G       = o_active_d ? i_green  : 4'b0;
+assign oVGA_B       = o_active_d ? i_blue   : 4'b0;
 
 // HOST OUTPUT LOGIC
 assign o_current_x  = (h_count >= H_BLANK) ? (h_count - H_BLANK) : 10'b0;
