@@ -28,7 +28,7 @@ module sdram_controller_test(
 
 	//////////// LED //////////
 	output		     [9:0]		LEDR,
-
+ 
 	//////////// SW //////////
 	input 		     [9:0]		SW
 );
@@ -38,19 +38,19 @@ module sdram_controller_test(
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
-reg    [15:0]   data;
+reg   [127:0]   data;
 reg     [4:0]   state           = 5'b00001;
 reg     [4:0]   next_state      = 5'b00010;
 
-wire   [24:0]   address         = 25'h011;
+wire   [21:0]   address         = 22'b1;
 wire            reset           = 1'b0;
 
 wire            write_command;
 wire            read_command;
 wire            write_finished;
 wire            read_finished;
-wire   [15:0]   write_data;
-wire   [15:0]   read_data;
+wire  [127:0]   write_data;
+wire  [127:0]   read_data;
 
 reg             write_request;
 reg             read_request;
@@ -58,7 +58,7 @@ reg             read_request;
 //=======================================================
 //  Structural coding
 //=======================================================
-assign  write_data      = {6'b111111, SW};
+assign  write_data      = {112'b0, SW};
 assign  LEDR            = data[9:0];
 
 assign  write_command   = ~KEY[0];

@@ -4,7 +4,7 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(10M50DAF484) Path("C:/AGH/FPGA/sdram-controller/") File("sdram_controller_test.sof") MfrSpec(OpMask(1));
+		Device PartName(10M50DAF484) Path("D:/Projekty/sdram-controller/sdram_test2/") File("sdram_vga_test.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

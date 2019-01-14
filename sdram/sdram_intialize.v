@@ -73,11 +73,13 @@ end
 always @(state or ireq or ref_cycles or init_begin_counter)
 begin
     case(state)
+        //IDLE
         8'b00000001:
             if(ireq)
                 next_state  <= 8'b00000010;
             else
                 next_state  <= 8'b00000001;
+        //NOP - POWER UP
 		8'b00000010:
             if(init_begin_counter)
                 next_state  <= 8'b00000100;
@@ -155,7 +157,7 @@ begin
         begin
             command             <= #1 4'b0000;
             bank                <= #1 2'b00;    
-            address             <= #1 13'b0001000100000;
+            address             <= #1 13'b0000000100011;
             ready               <= #1 1'b0;
             
             ctr_reset           <= #1 1'b0;

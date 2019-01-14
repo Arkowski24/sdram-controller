@@ -8,7 +8,7 @@ module sdram_write(
     input           [12:0]      irow,
     input            [9:0]      icolumn,
     input            [1:0]      ibank,
-    input 		    [15:0]		idata,
+    input 		   [127:0]		idata,
     
     output		          		DRAM_CLK,
     output		          		DRAM_CKE,
@@ -29,36 +29,35 @@ reg      [6:0]  next_state;
 reg      [3:0]  command     = 4'h0;
 reg     [12:0]  address     = 13'h0;
 reg      [1:0]  bank        = 2'b00;
+reg    [127:0]  data        = 128'h0;
 reg      [1:0]  dqm         = 2'b11;
 
 reg             ready       = 1'b0;
 
-reg      [3:0]  counter     = 4'h0;
+reg      [7:0]  counter     = 8'h0;
 reg             ctr_reset   = 0;
 
-wire    nop_count1;
-wire    nop_count2;
+wire    data_count;
 
 assign ofin                                             = ready;
 
-assign DRAM_ADDR                                        = ienb ? address    : 13'bz;
-assign DRAM_BA                                          = ienb ? bank       : 2'bz;
-assign {DRAM_CS_N, DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N}   = ienb ? command    : 4'bz;
-assign {DRAM_UDQM, DRAM_LDQM}                           = ienb ? dqm        : 2'bz;
-assign DRAM_CLK                                         = ienb ? ~iclk      : 1'bz;
-assign DRAM_CKE                                         = ienb ? 1'b1       : 1'bz;
-assign DRAM_DQ                                          = ienb ? idata      : 16'bz;
+assign DRAM_ADDR                                        = ienb ? address        : 13'bz;
+assign DRAM_BA                                          = ienb ? bank           : 2'bz;
+assign {DRAM_CS_N, DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N}   = ienb ? command        : 4'bz;
+assign {DRAM_UDQM, DRAM_LDQM}                           = ienb ? dqm            : 2'bz;
+assign DRAM_CLK                                         = ienb ? ~iclk          : 1'bz;
+assign DRAM_CKE                                         = ienb ? 1'b1           : 1'bz;
+assign DRAM_DQ                                          = ienb ? data[127:112]  : 16'bz;
 
 always @(posedge iclk or posedge ctr_reset)
 begin
     if(ctr_reset)
-        counter <= #1 4'h0;
+        counter <= #1 8'h0;
     else
         counter <= #1 (counter + 1'b1);
 end
 
-assign nop_count1 = (counter[1:0] == 2'b11 || counter[2] == 1'b1 || counter[3] == 1'b1);
-assign nop_count2 = (counter[1:0] == 2'b11 || counter[2] == 1'b1 || counter[3] == 1'b1);
+assign data_count = (counter == 5);
 
 always @(posedge iclk)
 begin
@@ -68,30 +67,34 @@ begin
         state <= #1 next_state;
 end
 
-always @(state or ireq or nop_count1 or nop_count2)
+always @(state or ireq or data_count)
 begin
     case(state)
+        //IDLE
         7'b0000001:
             if(ireq)
                 next_state   <= 7'b0000010;
             else
                 next_state   <= 7'b0000001;
+        //ACTIVE
         7'b0000010:
             next_state       <= 7'b0000100;
+        //NOP
         7'b0000100:
-            if(nop_count1)
-                next_state   <= 7'b0001000;
-            else
-                next_state   <= 7'b0000100;
+            next_state       <= 7'b0001000;
+        //WRITE
         7'b0001000:
-                next_state   <= 7'b0010000;
+                next_state   <= 7'b0010000;                
+        //WRITING   
         7'b0010000:
-            if(nop_count2)
+            if(data_count)
                 next_state   <= 7'b0100000;
             else
                 next_state   <= 7'b0010000;
+        //NOP
         7'b0100000:
             next_state       <= 7'b1000000;
+        //NOP - FIN
         7'b1000000:
             next_state       <= 7'b0000001;
         default:
@@ -102,62 +105,86 @@ end
 always @(posedge iclk)
 begin
     case(state)
+        //IDLE
         7'b0000001:
         begin
             command             <= #1 4'b0111;
             address             <= #1 13'b0000000000000;
             bank                <= #1 2'b00;
             dqm                 <= #1 2'b11;
+            data                <= #1 data;
             ready               <= #1 1'b0;
             
             ctr_reset           <= #1 1'b0;
         end
+        //ACTIVE
         7'b0000010:
         begin
             command             <= #1 4'b0011;
             address             <= #1 irow;
             bank                <= #1 ibank;
             dqm                 <= #1 2'b11;
+            data                <= #1 idata;
             ready               <= #1 1'b0;
             
-            ctr_reset           <= #1 1'b1;
+            ctr_reset           <= #1 1'b0;
         end
+        //NOP
         7'b0000100:
         begin
             command             <= #1 4'b0111;
             address             <= #1 13'b0000000000000;   
             bank                <= #1 2'b00;
             dqm                 <= #1 2'b11;
+            data                <= #1 data;
             ready               <= #1 1'b0;
             
-            ctr_reset           <= #1 1'b0;
+            ctr_reset           <= #1 1'b1;
         end
+        //WRITE
         7'b0001000:
         begin
             command             <= #1 4'b0100;
             address             <= #1 {3'b001, icolumn};
             bank                <= #1 ibank;
             dqm                 <= #1 2'b00;
+            data                <= #1 data;
             ready               <= #1 1'b0; 
             
             ctr_reset           <= #1 1'b1;
         end
+        //WRITING  
         7'b0010000:
         begin
             command             <= #1 4'b0111;
             address             <= #1 13'b0000000000000;   
             bank                <= #1 2'b00;
-            dqm                 <= #1 2'b11;
+            dqm                 <= #1 2'b00;
+            data                <= #1 (data << 16);
             ready               <= #1 1'b0;
             
             ctr_reset           <= #1 1'b0;
         end
+        //NOP
         7'b0100000:
         begin
             command             <= #1 4'b0111;
             address             <= #1 13'b0000000000000;   
             bank                <= #1 2'b00;
             dqm                 <= #1 2'b11;
+            data                <= #1 data;
+            ready               <= #1 1'b0;
+            
+            ctr_reset           <= #1 1'b0;
+        end
+        //NOP - FIN
+        7'b1000000:
+        begin
+            command             <= #1 4'b0111;
+            address             <= #1 13'b0000000000000;   
+            bank                <= #1 2'b00;
+            dqm                 <= #1 2'b11;
+            data                <= #1 data;
             ready               <= #1 1'b1;
             
             ctr_reset           <= #1 1'b0;
