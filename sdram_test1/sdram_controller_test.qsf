@@ -4,7 +4,7 @@
 
 set_global_assignment -name FAMILY "MAX 10 FPGA"
 set_global_assignment -name DEVICE 10M50DAF484C7G
-set_global_assignment -name TOP_LEVEL_ENTITY generator_sdram_adapter
+set_global_assignment -name TOP_LEVEL_ENTITY sdram_controller_test
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 16.0.0
 set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Lite Edition"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:45:59 DECEMBER 31,2018"
@@ -172,14 +172,10 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[7]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[8]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[9]
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_global_assignment -name VERILOG_FILE sdram/sdram_write.v
-set_global_assignment -name VERILOG_FILE sdram/sdram_read.v
-set_global_assignment -name VERILOG_FILE sdram/sdram_intialize.v
-set_global_assignment -name VERILOG_FILE sdram/sdram_controller.v
+set_global_assignment -name VERILOG_FILE ../sdram/sdram_write.v
+set_global_assignment -name VERILOG_FILE ../sdram/sdram_read.v
+set_global_assignment -name VERILOG_FILE ../sdram/sdram_intialize.v
+set_global_assignment -name VERILOG_FILE ../sdram/sdram_controller.v
 set_global_assignment -name VERILOG_FILE sdram_controller_test.v
 set_global_assignment -name SDC_FILE sdram_controller_test.SDC
-set_global_assignment -name VECTOR_WAVEFORM_FILE Waveform.vwf
-set_global_assignment -name VERILOG_FILE sdram_test2/vga/vga_sdram_adapter.v
-set_global_assignment -name VERILOG_FILE sdram_test2/vga/vga_controller.v
-set_global_assignment -name VERILOG_FILE sdram_test2/generator/generator_sdram_adapter.v
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
