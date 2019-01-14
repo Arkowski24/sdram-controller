@@ -36,7 +36,6 @@ wire            fetch_next;
 
 assign current_pixel    = 640 * i_current_y + i_current_x;
 assign pixel_offset     = current_pixel % 10;
-//Fast division by 10
 assign current_bank     = (64'h1999999A * current_pixel) >> 32;
 assign future_bank      = (current_bank < 30720) ? current_bank + 1 : 0;
 assign fetch_next       = (pixel_offset == 0) && i_active_d;

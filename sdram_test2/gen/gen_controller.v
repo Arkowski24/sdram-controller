@@ -35,11 +35,6 @@ reg [10:0] v_count;
 
 reg        oVGA_HS;
 
-// VGA Color Data
-assign o_red        = 4'b1111;
-assign o_green      = 4'b0000;
-assign o_blue       = 4'b0000;
-
 // HOST OUTPUT LOGIC
 assign o_current_x  = (h_count >= H_BLANK) ? (h_count - H_BLANK) : 10'b0;
 assign o_current_y  = (v_count >= V_BLANK) ? (v_count - V_BLANK) : 10'b0;
@@ -83,5 +78,14 @@ begin
             v_count <= 0;
     end
 end
+
+gen_logic gen_logic(
+    .i_x(o_current_x),
+    .i_y(o_current_y),
+    
+    .o_red(o_red),
+    .o_green(o_green),
+    .o_blue(o_blue)
+);
 
 endmodule
